@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Gym Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #e8e4db;
+    --muted: #555;
+    --faint: #333;
+    --mon: #6ee7b7;
+    --tue: #93c5fd;
+    --wed: #fbbf24;
+    --thu: #93c5fd;
+    --fri: #f0abfc;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Fraunces', Georgia, serif;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    padding: 32px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .header-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .header h1 {
+    font-size: 26px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .header-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Streak bar */
+  .streak-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .streak-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .streak-num {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+  }
+  .streak-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .streak-dots {
+    display: flex;
+    gap: 6px;
+  }
+  .streak-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--faint);
+    transition: background 0.3s;
+  }
+  .streak-dot.filled { background: var(--mon); }
+
+  /* Timeline */
+  .timeline {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: #111;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    gap: 4px;
+  }
+  .timeline-item { text-align: center; min-width: 56px; }
+  .timeline-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent, var(--mon));
+  }
+  .timeline-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+
+  /* Day tabs */
+  .tabs {
+    display: flex;
+    padding: 16px 16px 0;
+    gap: 6px;
+    overflow-x: auto;
+    background: var(--bg);
+  }
+  .tab {
+    background: var(--surface2);
+    color: var(--muted);
+    border: none;
+    border-radius: 8px 8px 0 0;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    min-width: 58px;
+    text-align: center;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+    flex-shrink: 0;
+  }
+  .tab.active {
+    color: #0d0d0d;
+    font-weight: 600;
+  }
+  .tab-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .tab-emoji { font-size: 18px; display: block; }
+  .tab-done-badge {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #6ee7b7;
+    margin-top: 3px;
+  }
+
+  /* Day card */
+  .day-card {
+    background: var(--surface);
+    margin: 0 16px;
+    border-radius: 0 8px 8px 8px;
+    border: 1px solid var(--border);
+    padding: 22px;
+    border-top: 3px solid var(--accent);
+  }
+  .day-focus {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .day-title {
+    font-size: 22px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  /* Section label */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* Warmup / cooldown blocks */
+  .info-block {
+    background: #111;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--muted);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #bbb;
+    line-height: 1.6;
+  }
+
+  /* Exercise items */
+  .exercise-list { margin-bottom: 16px; }
+  .exercise-item {
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .exercise-item:active { transform: scale(0.98); }
+  .exercise-item.done {
+    background: #0f1a14;
+    border-color: #2a4a35;
+  }
+  .check-circle {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--faint);
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #0d0d0d;
+    font-weight: bold;
+    transition: all 0.25s;
+    background: transparent;
+  }
+  .exercise-item.done .check-circle {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .exercise-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+    transition: all 0.2s;
+  }
+  .exercise-item.done .exercise-name {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+  .exercise-sets {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+  .exercise-note {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Tip block */
+  .tip-block {
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #aaa;
+  }
+  .tip-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+  }
+
+  /* Complete day button */
+  .complete-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-style: italic;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+  .complete-btn:active { transform: scale(0.98); }
+  .complete-btn.completed {
+    background: #1a2e1e;
+    color: #6ee7b7;
+    border: 1px solid #2a4a35;
+  }
+  .complete-btn.not-completed {
+    color: #0d0d0d;
+    font-weight: 600;
+  }
+
+  /* Progress section */
+  .progress-section {
+    margin: 20px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .progress-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .week-cell {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    background: #111;
+    transition: all 0.3s;
+  }
+  .week-cell.done {
+    border-color: transparent;
+    color: #0d0d0d;
+    font-weight: 500;
+  }
+  .week-cell-day { font-size: 8px; letter-spacing: 1px; margin-bottom: 3px; }
+  .week-cell-emoji { font-size: 14px; }
+
+  /* History log */
+  .history-log {
+    margin-top: 12px;
+  }
+  .history-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+  }
+  .history-entry:last-child { border-bottom: none; }
+  .history-date { color: var(--muted); }
+  .history-day { color: var(--text); }
+  .history-check { color: #6ee7b7; }
+
+  /* Reset button */
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--faint);
+    color: var(--muted);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    margin-top: 12px;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: var(--muted); color: var(--text); }
+
+  /* Anxiety toolkit */
+  .toolkit {
+    margin: 0 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .toolkit-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .toolkit-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .toolkit-icon { font-size: 18px; flex-shrink: 0; }
+  .toolkit-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ddd;
+    margin-bottom: 2px;
+  }
+  .toolkit-item-body {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .scale-note {
+    margin: 0 16px 32px;
+    background: #111;
+    border: 1px dashed var(--faint);
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+  }
+  .scale-note-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .scale-note p {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .day-card { animation: fadeIn 0.2s ease; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">Your Weekly Plan</div>
+  <h1>6:00 – 6:45 PM Gym</h1>
+  <div class="header-sub">Low impact · Machines only · Zero confusion</div>
+</div>
+
+<div class="streak-bar">
+  <div class="streak-info">
+    <div>
+      <div class="streak-num" id="streakNum">0</div>
+      <div class="streak-label">Day Streak</div>
+    </div>
+  </div>
+  <div class="streak-dots" id="streakDots"></div>
+</div>
+
+<div class="timeline" id="timeline"></div>
+
+<div class="tabs" id="tabs"></div>
+
+<div id="dayCard"></div>
+
+<div class="progress-section">
+  <div class="progress-title">This Week's Progress</div>
+  <div class="week-grid" id="weekGrid"></div>
+  <div class="history-log" id="historyLog"></div>
+  <button class="reset-btn" onclick="confirmReset()">↺ Reset all progress</button>
+</div>
+
+<div class="toolkit">
+  <div class="toolkit-title">Gym Anxiety Toolkit</div>
+  <div class="toolkit-item"><span class="toolkit-icon">📋</span><div><div class="toolkit-item-title">You have a plan now.</div><div class="toolkit-item-body">You never need to wander or guess. Pull this up, check things off.</div></div></div>
+  <div class="toolkit-item"><span class="toolkit-icon">🎧</span><div><div class="toolkit-item-title">Headphones = force field.</div><div class="toolkit-item-body">Music or a podcast signals to your brain (and others) that you're in work mode.</div></div></div>
+  <div class="toolkit-item"><span class="toolkit-icon">⏱️</span><div><div class="toolkit-item-title">Between sets, rest 60–90 sec.</div><div class="toolkit-item-body">Pull up your phone. This is normal and expected. No one is watching.</div></div></div>
+  <div class="toolkit-item"><span class="toolkit-icon">🔢</span><div><div class="toolkit-item-title">Next machine = next item on this list.</div><div class="toolkit-item-body">You don't have to decide anything. Just scroll down.</div></div></div>
+  <div class="toolkit-item"><span class="toolkit-icon">🚪</span><div><div class="toolkit-item-title">It's okay to leave after the plan.</div><div class="toolkit-item-body">You did exactly what you came to do. That's a win.</div></div></div>
+</div>
+
+<div class="scale-note">
+  <div class="scale-note-label">When You're Ready to Level Up</div>
+  <p>After 3–4 weeks, add one set to each exercise, increase weight by one notch, or add 5 more minutes of cardio. Pick just one. That's how progress works.</p>
+</div>
+
+<script>
+const DAYS = [
+  {
+    label: "MON", name: "Full Body", focus: "Machines Only", color: "#6ee7b7", emoji: "💪",
+    warmup: "5 min walk on treadmill (slow, easy pace)",
+    exercises: [
+      { name: "Leg Press Machine", sets: "3 sets × 12 reps", note: "Light weight — you should finish without struggle" },
+      { name: "Chest Press Machine", sets: "3 sets × 12 reps", note: "Adjust seat so handles are at chest height" },
+      { name: "Seated Row Machine", sets: "3 sets × 12 reps", note: "Pull to your belly button, hold 1 second" },
+      { name: "Shoulder Press Machine", sets: "3 sets × 10 reps", note: "Don't lock out elbows at top" },
+    ],
+    cooldown: "5 min walk + light stretch (just walk it out)",
+    tip: "Pick weights where the last 2 reps feel slightly hard. That's your sweet spot.",
+  },
+  {
+    label: "TUE", name: "Cardio", focus: "Low Impact Movement", color: "#93c5fd", emoji: "🚴",
+    warmup: "2 min slow walk to loosen up",
+    exercises: [
+      { name: "Stationary Bike", sets: "20 minutes", note: "Resistance level 3–5. You should be able to hold a conversation." },
+      { name: "Elliptical", sets: "15 minutes", note: "Easy pace — no incline needed. Arms optional." },
+    ],
+    cooldown: "5 min very slow walk on treadmill to bring heart rate down",
+    tip: "Tuesday is your 'almost no thinking required' day. Just pick a machine and go.",
+  },
+  {
+    label: "WED", name: "Lower Body", focus: "Legs & Core", color: "#fbbf24", emoji: "🦵",
+    warmup: "5 min treadmill walk",
+    exercises: [
+      { name: "Leg Press Machine", sets: "3 sets × 15 reps", note: "Slightly lighter than Monday — more reps today" },
+      { name: "Seated Leg Curl Machine", sets: "3 sets × 12 reps", note: "This works your hamstrings (back of thigh)" },
+      { name: "Leg Extension Machine", sets: "3 sets × 12 reps", note: "This works your quads (front of thigh)" },
+      { name: "Ab Crunch Machine", sets: "3 sets × 15 reps", note: "Slow and controlled — no yanking" },
+    ],
+    cooldown: "Sit on a bench and do 2 min of slow deep breathing. Done.",
+    tip: "Legs might feel wobbly after. That's normal! It means it worked.",
+  },
+  {
+    label: "THU", name: "Cardio", focus: "Low Impact Movement", color: "#93c5fd", emoji: "🚶",
+    warmup: "None needed — today IS the warmup",
+    exercises: [
+      { name: "Treadmill Walk", sets: "30 minutes", note: "Speed 3.0–3.5, slight incline (1–2%). Put on a podcast." },
+      { name: "Seated Calf Raises", sets: "3 sets × 20 reps", note: "Or skip this — the walk is enough." },
+    ],
+    cooldown: "Slow your treadmill for the last 3 min automatically — done",
+    tip: "Thursday is your easiest day by design. You've already done the hard work this week.",
+  },
+  {
+    label: "FRI", name: "Upper Body", focus: "Arms, Back & Chest", color: "#f0abfc", emoji: "🏋️",
+    warmup: "5 min treadmill or bike",
+    exercises: [
+      { name: "Lat Pulldown Machine", sets: "3 sets × 12 reps", note: "Pull bar to your upper chest, not behind your neck" },
+      { name: "Chest Fly Machine", sets: "3 sets × 12 reps", note: "Slow and controlled — feel the stretch" },
+      { name: "Bicep Curl Machine", sets: "3 sets × 12 reps", note: "Or use dumbbells if you want to try something new" },
+      { name: "Tricep Pushdown Machine", sets: "3 sets × 12 reps", note: "Keep elbows tucked at your sides" },
+    ],
+    cooldown: "5 min walk, shake out your arms. Weekend starts now.",
+    tip: "Friday is your 'feel accomplished' day. You showed up all 5 days. That's everything.",
+  },
+];
+
+const TIMELINE = [
+  { time: "6:00", label: "Arrive" },
+  { time: "6:05", label: "Warm-up" },
+  { time: "6:10", label: "Workout" },
+  { time: "6:40", label: "Cool Down" },
+  { time: "6:45", label: "Done!" },
+];
+
+// --- STATE ---
+let activeDay = 0;
+let state = loadState();
+
+function loadState() {
+  try {
+    return JSON.parse(localStorage.getItem('gymTracker')) || { completedDays: [], exerciseChecks: {}, streak: 0, lastDate: null };
+  } catch { return { completedDays: [], exerciseChecks: {}, streak: 0, lastDate: null }; }
+}
+
+function saveState() {
+  localStorage.setItem('gymTracker', JSON.stringify(state));
+}
+
+function todayKey() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function formatDate(isoDate) {
+  const d = new Date(isoDate + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+// --- RENDER ---
+function renderAll() {
+  renderTimeline();
+  renderTabs();
+  renderDayCard();
+  renderWeekGrid();
+  renderHistory();
+  renderStreak();
+}
+
+function renderTimeline() {
+  const color = DAYS[activeDay].color;
+  document.getElementById('timeline').style.setProperty('--accent', color);
+  document.getElementById('timeline').innerHTML = TIMELINE.map(t => `
+    <div class="timeline-item">
+      <div class="timeline-time" style="color:${color}">${t.time}</div>
+      <div class="timeline-label">${t.label}</div>
+    </div>
+  `).join('');
+}
+
+function renderTabs() {
+  document.getElementById('tabs').innerHTML = DAYS.map((d, i) => {
+    const isDone = isDayCompleted(i);
+    return `
+      <button class="tab ${i === activeDay ? 'active' : ''}"
+        style="${i === activeDay ? `background:${d.color};` : ''}"
+        onclick="switchDay(${i})">
+        <span class="tab-label">${d.label}</span>
+        <span class="tab-emoji">${d.emoji}</span>
+        ${isDone ? '<span class="tab-done-badge"></span>' : ''}
+      </button>`;
+  }).join('');
+}
+
+function isDayCompleted(dayIdx) {
+  return state.completedDays.some(e => e.dayIdx === dayIdx && e.date === todayKey());
+}
+
+function renderDayCard() {
+  const d = DAYS[activeDay];
+  const dayDone = isDayCompleted(activeDay);
+
+  const exHTML = d.exercises.map((ex, i) => {
+    const key = `${activeDay}-${i}-${todayKey()}`;
+    const checked = !!state.exerciseChecks[key];
+    return `
+      <div class="exercise-item ${checked ? 'done' : ''}" onclick="toggleExercise(${i})">
+        <div class="check-circle" style="${checked ? `background:${d.color};border-color:${d.color}` : ''}">${checked ? '✓' : ''}</div>
+        <div>
+          <div class="exercise-name">${ex.name}</div>
+          <div class="exercise-sets" style="color:${d.color}">${ex.sets}</div>
+          <div class="exercise-note">${ex.note}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('dayCard').innerHTML = `
+    <div class="day-card" style="--accent:${d.color}; border-top-color:${d.color}">
+      <div class="day-focus" style="color:${d.color}">${d.focus}</div>
+      <div class="day-title">${d.emoji} ${d.name} Day</div>
+
+      <div class="section-label">Warm-up</div>
+      <div class="info-block">${d.warmup}</div>
+
+      <div class="section-label">Exercises</div>
+      <div class="exercise-list">${exHTML}</div>
+
+      <div class="section-label">Cool Down</div>
+      <div class="info-block">${d.cooldown}</div>
+
+      <div class="tip-block" style="background:${d.color}11; border:1px solid ${d.color}33">
+        <div class="tip-label" style="color:${d.color}">💡 Remember</div>
+        ${d.tip}
+      </div>
+
+      <button class="complete-btn ${dayDone ? 'completed' : 'not-completed'}"
+        style="${dayDone ? '' : `background:${d.color}`}"
+        onclick="markDayComplete()">
+        ${dayDone ? '✓ Day Complete!' : 'Mark Day Complete'}
+      </button>
+    </div>`;
+}
+
+function renderWeekGrid() {
+  document.getElementById('weekGrid').innerHTML = DAYS.map((d, i) => {
+    const done = isDayCompleted(i);
+    return `
+      <div class="week-cell ${done ? 'done' : ''}" style="${done ? `background:${d.color}22; border-color:${d.color}66` : ''}">
+        <div class="week-cell-day" style="${done ? `color:${d.color}` : ''}">${d.label}</div>
+        <div class="week-cell-emoji">${done ? '✓' : d.emoji}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderHistory() {
+  const log = document.getElementById('historyLog');
+  if (!state.completedDays.length) {
+    log.innerHTML = '<div style="font-family:DM Mono,monospace;font-size:11px;color:var(--muted);text-align:center;padding:10px 0">No sessions logged yet</div>';
+    return;
+  }
+  const recent = [...state.completedDays].reverse().slice(0, 10);
+  log.innerHTML = recent.map(e => `
+    <div class="history-entry">
+      <span class="history-date">${formatDate(e.date)}</span>
+      <span class="history-day">${DAYS[e.dayIdx].emoji} ${DAYS[e.dayIdx].name}</span>
+      <span class="history-check">✓</span>
+    </div>`).join('');
+}
+
+function renderStreak() {
+  document.getElementById('streakNum').textContent = state.streak;
+  const dots = document.getElementById('streakDots');
+  dots.innerHTML = Array.from({length: 5}, (_, i) =>
+    `<div class="streak-dot ${i < Math.min(state.streak, 5) ? 'filled' : ''}"></div>`
+  ).join('');
+}
+
+// --- ACTIONS ---
+function switchDay(i) {
+  activeDay = i;
+  renderAll();
+}
+
+function toggleExercise(exIdx) {
+  const key = `${activeDay}-${exIdx}-${todayKey()}`;
+  state.exerciseChecks[key] = !state.exerciseChecks[key];
+  saveState();
+  renderDayCard();
+  renderWeekGrid();
+}
+
+function markDayComplete() {
+  if (isDayCompleted(activeDay)) return;
+  const today = todayKey();
+  state.completedDays.push({ dayIdx: activeDay, date: today });
+
+  // Update streak
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yKey = yesterday.toISOString().split('T')[0];
+  if (state.lastDate === yKey || state.lastDate === today) {
+    state.streak = (state.streak || 0) + 1;
+  } else {
+    state.streak = 1;
+  }
+  state.lastDate = today;
+
+  saveState();
+  renderAll();
+}
+
+function confirmReset() {
+  if (confirm('Reset all progress? This cannot be undone.')) {
+    state = { completedDays: [], exerciseChecks: {}, streak: 0, lastDate: null };
+    saveState();
+    renderAll();
+  }
+}
+
+// Init
+renderAll();
+</script>
+</body>
+</html>
